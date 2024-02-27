@@ -38,3 +38,19 @@ $(INT_FASTQ) : code/interleave_fastq.sh\
 	code/interleave_fastq.sh $(INT_LISTR1) $(INT_LISTR2) $(INT_OUT)
 
 int : $(INT_LISTR1) $(INT_LISTR2) $(INT_OUT) $(INT_FASTQ)
+
+#### Quality filtering ####
+
+# Get RQCFilter database
+RQCF_DB=data/reference/RQCFilterData
+
+$(RQCF_DB) : code/get_rqcfilter_database.sh
+	code/get_rqcfilter_database.sh $@
+
+# Filter reads
+RQC_FILT=data/qfiltered/
+
+$(RQC_FILT) : code/filter_reads.sh\
+		$$(INT_OUT)
+	code/filter_reads.sh $(INT_OUT) $@
+

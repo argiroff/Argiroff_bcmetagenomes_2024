@@ -27,14 +27,18 @@ cd /lustre/or-scratch/cades-bsd/7wa/Argiroff_bcmetagenomes_2024
 
 source activate seqfu_env
 
+inlist1=`echo "$1"`
+inlist2=`echo "$2"`
+outlist=`echo "$3"`
+
 # Get intput files according to task ID
-infileR1=$(awk "NR==${SLURM_ARRAY_TASK_ID}" int_R1_infiles.txt)
-infileR2=$(awk "NR==${SLURM_ARRAY_TASK_ID}" int_R2_infiles.txt)
-outfile=$(awk "NR==${SLURM_ARRAY_TASK_ID}" int_outfiles.txt)
+infileR1=$(awk "NR==${SLURM_ARRAY_TASK_ID}" "$inlist1")
+infileR2=$(awk "NR==${SLURM_ARRAY_TASK_ID}" "$inlist2")
+outfile=$(awk "NR==${SLURM_ARRAY_TASK_ID}" "$outlist")
 
 # Interleave files
 seqfu ilv -1 $infileR1 -2 $infileR2 -c | gzip -c > $outfile
 
 conda deactivate
 
-echo 'done'
+echo 'Done.'
