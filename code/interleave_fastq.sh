@@ -2,9 +2,9 @@
 
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=1
 #SBATCH --time=20:00:00
-#SBATCH --mem-per-cpu=50G
+#SBATCH --mem-per-cpu=64G
 #SBATCH --job-name=int_%a
 #SBATCH --output=int_%a.out
 #SBATCH -p batch 
