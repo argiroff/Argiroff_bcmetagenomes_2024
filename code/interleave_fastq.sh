@@ -16,16 +16,7 @@
 # inputs: R1 fastq, R2 fastq
 # output: interleaved fastq with R1 followed by R2
 
-# Installation of SeqFu
-# module load anaconda3
-# conda create --name seqfu_env
-# conda activate seqfu_env
-# conda install -c conda-forge -c bioconda "seqfu>1.0"
-# conda deactivate
-
 cd /lustre/or-scratch/cades-bsd/7wa/Argiroff_bcmetagenomes_2024
-
-source activate seqfu_env
 
 inlist1=`echo "$1"`
 inlist2=`echo "$2"`
@@ -38,7 +29,5 @@ outfile=$(awk "NR==${SLURM_ARRAY_TASK_ID}" "$outlist")
 
 # Interleave files
 seqfu ilv -1 $infileR1 -2 $infileR2 -c | gzip -c > $outfile
-
-conda deactivate
 
 echo 'Done.'
