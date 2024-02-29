@@ -9,48 +9,43 @@ print-% :
 
 #### Interleave fastq ####
 
-# Make file lists
-INT_LISTR1=filelists/int_R1_infiles.txt
-
-$(INT_LISTR1) : code/make_intR1_filelist.sh
-	code/make_intR1_filelist.sh $@
-
-# Make R2 file list
-INT_LISTR2=filelists/int_R2_infiles.txt
-
-$(INT_LISTR2) : code/make_intR2_filelist.sh
-	code/make_intR2_filelist.sh $@
-
-# Make interleaved output file list
-INT_OUT=filelists/int_outfiles.txt
-
-$(INT_OUT) : code/make_intout_filelist.sh\
-		$$(INT_LISTR1)
-	code/make_intout_filelist.sh $(INT_LISTR1) $@
-
 # Interleave R1 and R2 into single fastq
-INT_FASTQ=data/int/
+INT_FASTQ_TEMP1=$(wildcard data/raw/*_R1_001.fastq.gz)
+INT_FASTQ_TEMP2=$(subst raw,int,$(INT_FASTQ_TEMP1))
+INT_FASTQ=$(subst _R1_,_int_,$(INT_FASTQ_TEMP2))
 
-$(INT_FASTQ) : code/interleave_fastq.sh\
-		$$(INT_LISTR1)\
-		$$(INT_LISTR2)\
-		$$(INT_OUT)
-	code/interleave_fastq.sh $(INT_LISTR1) $(INT_LISTR2) $(INT_OUT)
+$(INT_FASTQ) : code/interleave_fastq_local.sh\
+		$$(subst data/int/,data/raw/, $$(subst _int_,_R1_,$$@))\
+		$$(subst data/int/,data/raw/, $$(subst _int_,_R2_,$$@))
+	code/interleave_fastq_local.sh $(subst data/int/,data/raw/, $(subst _int_,_R1_,$@)) $(subst data/int/,data/raw/, $(subst _int_,_R2_,$@)) $@
 
-int : $(INT_LISTR1) $(INT_LISTR2) $(INT_OUT) $(INT_FASTQ)
+#### Quality filter and decontamination ####
 
-#### Quality filtering ####
+# Remove adapters
+ADPT=$(subst int,adptfilt,$(INT_FASTQ))
 
-# Get RQCFilter database
-RQCF_DB=data/reference/RQCFilterData
+$(ADPT) : code/filter_contam_local.sh\
+		$$(subst adaptfilt,int,$$@)\
+		code/bbmap/resources/adapters.fa
+	code/filter_contam_local.sh $(subst adaptfilt,int,$@) code/bbmap/resources/adapters.fa $@
 
-$(RQCF_DB) : code/get_rqcfilter_database.sh
-	code/get_rqcfilter_database.sh $@
+# Remove PhiX
+PHIX=$(subst adptfilt,phixfilt,$(ADPT))
 
-# Filter reads
-RQC_FILT=data/qfiltered/
+$(PHIX) : code/filter_contam_local.sh\
+		$$(subst phixfilt,adptfilt,$$@)\
+		code/bbmap/resources/phix174_ill.ref.fa.gz
+	code/filter_contam_local.sh $(subst phixfilt,adptfilt,$@) code/bbmap/resources/phix174_ill.ref.fa.gz $@
 
-$(RQC_FILT) : code/filter_reads.sh\
-		$$(INT_OUT)
-	code/filter_reads.sh $(INT_OUT) $@
+# Filter low quality reads
+QUAL=$(subst phixfilt,qualfilt,$(PHIX))
+
+$(QUAL) : code/filter_qual_local.sh\
+		$$(PHIX)
+	code/filter_qual_local.sh $(PHIX) $@
+
+adpt : $(INT_FASTQ) $(ADPT) $(PHIX) $(QUAL)
+
+#### Assemble contigs ####
+
 
