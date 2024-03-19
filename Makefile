@@ -9,7 +9,7 @@ print-% :
 
 #### Interleave fastq ####
 
-# Interleave R1 and R2 into single fastq
+# Interleave R1 and R2 into single fastq file
 INT_FASTQ_TEMP1=$(wildcard data/raw/*_R1_001.fastq.gz)
 INT_FASTQ_TEMP2=$(subst raw,int,$(INT_FASTQ_TEMP1))
 INT_FASTQ=$(subst _R1_,_int_,$(INT_FASTQ_TEMP2))
