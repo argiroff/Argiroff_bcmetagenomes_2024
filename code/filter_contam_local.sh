@@ -11,7 +11,7 @@ infile=`echo "$1"`
 reffile=`echo "$2"`
 outfile=`echo "$3"`
 
-# Filter out adapter sequences
+# Filter out adapter or PhiX sequences
 ./code/bbmap/bbduk.sh in=$infile out=$outfile ref=$reffile ktrim=r k=23 mink=11 hdist=1 tpe tbo
 
 echo 'Done.'

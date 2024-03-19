@@ -10,20 +10,20 @@
 #SBATCH -p batch 
 #SBATCH -A bsd
 
-# name: make_intout_filelist.sh
+# name: make_assembly_outdir_list.sh
 # author: William Argiroff
-# inputs: .txt file with list of R1 fastq names
-# output: .txt file with list of interleaved fastq names
+# inputs: .txt file with list of quality filtered file names
+# output: .txt file with list of output directories for the assemblies
 
 cd /lustre/or-scratch/cades-bsd/7wa/Argiroff_bcmetagenomes_2024
 
 # Get intput files according to task ID
-infileR1=`echo "$1"`
-outfile=`echo "$2"`
+infile=`echo "$1"`
+outdir=`echo "$2"`
 
 # Generate file lists
-cp $infileR1 $outfile
-sed -i "s/\_R1/\_int/g" $outfile
-sed -i "s/raw/int/g" $outfile
+cp $infile $outdir
+sed -i "s/qfilt/assembly/g" $outdir
+sed -i "s/\_001.fastq.gz//g" $outdir
 
 echo 'done'
